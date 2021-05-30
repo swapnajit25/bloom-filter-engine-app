@@ -11,25 +11,40 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.brd.bloom.exceptions.FailedReadingFromStore;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
 @Component
 public class Reader<T>
 {
 	private static final Logger LOG = Logger.getLogger(Reader.class.getName());
-	private final String fileName = "data-storage-4000.txt";
+	private final String FILE_NAME = "data-storage-4000.txt";
 	
 	public List<T> read() throws Exception
 	{
 		List<T> list = null;
-		try(Stream<String> stream = Files.lines(Paths.get(Reader.class.getClassLoader().getResource(fileName).toURI())))
+		Resource resource = null;
+		Stream<String> stream = null;
+		
+		try
 		{
+			resource = new ClassPathResource(FILE_NAME);
+			stream = Files.lines(Paths.get(resource.getURI()));
+			
 			list = (List<T>) stream.collect(Collectors.toList());
 		}
 		catch(Exception ex)
 		{
 			LOG.log(Level.SEVERE, "Failed reading", ex);
 			throw new FailedReadingFromStore("Failed Reading From Store..", ex);
+		}
+		finally 
+		{
+			if(stream != null)
+				stream.close();
 		}
 		return list;
 	}
