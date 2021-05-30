@@ -35,29 +35,11 @@ public class BloomFilter
 		catch (Exception e)
 		{
 			// de-initialize the bit set
+			LOG.log(Level.SEVERE, "Exception Creating Bloom Filter", e);
 			bitSet = null;
 		}
 	}
 
-	public static void main(String[] args)
-	{
-		try
-		{
-			BloomFilter bf = new BloomFilter();
-			
-			System.out.println(bf.fastSearch("heritag"));
-		} 
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
-	
-	public void addNewWord()
-	{
-		
-	}
-	
 	public boolean fastSearch(final String value) throws Exception
 	{
 		// Stop searching when Bloom Filter Failed initialization
@@ -102,5 +84,10 @@ public class BloomFilter
 		{
 			throw new BloomFilterCreationException("Failed Creating Bloom Filter", ex);
 		}
+	}
+	
+	public void addNewWord()
+	{
+		
 	}
 }
