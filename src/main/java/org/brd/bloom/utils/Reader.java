@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.spi.FileSystemProvider;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -46,21 +47,20 @@ public class Reader<T>
 		{
 			resource = new ClassPathResource(FILE_NAME);
 			URI uri = resource.getURI();
+			Path path = null;
 			
-			if("jar".equals(uri.getScheme())){
-			    for (FileSystemProvider provider: FileSystemProvider.installedProviders()) {
-			        if (provider.getScheme().equalsIgnoreCase("jar")) {
-			            try {
-			                provider.getFileSystem(uri);
-			            } catch (FileSystemNotFoundException e) {
-			                // in this case we need to initialize it first:
-			                provider.newFileSystem(uri, Collections.emptyMap());
-			            }
-			        }
-			    }
+			if("jar".equals(uri.getScheme()))
+			{
+				LOG.info("INSIDE JAR.....");
+				final Map<String, String> env = new HashMap<>();
+				final String[] array = uri.toString().split("!");
+				LOG.info("ARRAY: " + Arrays.toString(array));
+				fs = FileSystems.newFileSystem(URI.create(array[0]), env);
+				path = fs.getPath(array[1] + array[2]);
+				LOG.info("PATH: " + path.toString());
 			}
 			
-			Path path = Paths.get(uri);
+			LOG.info("OUT SIDE IF");
 			stream = Files.lines(path);
 			list = (List<T>) stream.collect(Collectors.toList());
 		}
