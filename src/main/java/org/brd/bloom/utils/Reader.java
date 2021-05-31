@@ -1,9 +1,14 @@
 package org.brd.bloom.utils;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -29,14 +34,19 @@ public class Reader<T>
 		List<T> list = null;
 		Resource resource = null;
 		Stream<String> stream = null;
+		FileSystem fs = null;
 		
 		try
 		{
 			resource = new ClassPathResource(FILE_NAME);
-			LOG.info("Resource:" + resource.getURI().getPath());
+			URI uri = resource.getURI();
+			final String[] arr = uri.toString().split("!");
+			fs = FileSystems.newFileSystem(URI.create(arr[0]), new HashMap<String, String>());
+			final Path path = fs.getPath(arr[1]);
+			
+			LOG.info("Resource:" + path.toString());
 			
 			stream = Files.lines(Paths.get(resource.getURI()));
-			
 			list = (List<T>) stream.collect(Collectors.toList());
 		}
 		catch(Exception ex)
@@ -48,6 +58,8 @@ public class Reader<T>
 		{
 			if(stream != null)
 				stream.close();
+			if(fs != null)
+				fs.close();
 		}
 		return list;
 	}
