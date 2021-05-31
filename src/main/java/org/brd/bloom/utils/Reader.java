@@ -1,6 +1,8 @@
 package org.brd.bloom.utils;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.FileSystem;
@@ -42,13 +44,8 @@ public class Reader<T>
 		try
 		{
 			resource = new ClassPathResource(FILE_NAME);
-			URI uri = resource.getURI();
-			fs = initFileSystem(uri);
-			final Path path = Paths.get(uri);
-			
-			LOG.info("Resource:" + path.toString());
-			
-			stream = Files.lines(path);
+			BufferedReader br = new BufferedReader(new InputStreamReader(resource.getInputStream()));
+			stream = br.lines();
 			list = (List<T>) stream.collect(Collectors.toList());
 		}
 		catch(Exception ex)
