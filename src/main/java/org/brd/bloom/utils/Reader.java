@@ -11,6 +11,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -44,8 +45,23 @@ public class Reader<T>
 		try
 		{
 			resource = new ClassPathResource(FILE_NAME);
-			BufferedReader br = new BufferedReader(new InputStreamReader(resource.getInputStream()));
-			stream = br.lines();
+			URI uri = resource.getURI();
+			
+			if("jar".equals(uri.getScheme())){
+			    for (FileSystemProvider provider: FileSystemProvider.installedProviders()) {
+			        if (provider.getScheme().equalsIgnoreCase("jar")) {
+			            try {
+			                provider.getFileSystem(uri);
+			            } catch (FileSystemNotFoundException e) {
+			                // in this case we need to initialize it first:
+			                provider.newFileSystem(uri, Collections.emptyMap());
+			            }
+			        }
+			    }
+			}
+			
+			Path path = Paths.get(uri);
+			stream = Files.lines(path);
 			list = (List<T>) stream.collect(Collectors.toList());
 		}
 		catch(Exception ex)
