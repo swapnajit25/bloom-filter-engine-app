@@ -51,16 +51,16 @@ public class Reader<T>
 			
 			if("jar".equals(uri.getScheme()))
 			{
-				LOG.info("INSIDE JAR.....");
 				final Map<String, String> env = new HashMap<>();
 				final String[] array = uri.toString().split("!");
-				LOG.info("ARRAY: " + Arrays.toString(array));
 				fs = FileSystems.newFileSystem(URI.create(array[0]), env);
 				path = fs.getPath(array[1] + array[2]);
-				LOG.info("PATH: " + path.toString());
+			}
+			else
+			{
+				path = Paths.get(uri);
 			}
 			
-			LOG.info("OUT SIDE IF");
 			stream = Files.lines(path);
 			list = (List<T>) stream.collect(Collectors.toList());
 		}

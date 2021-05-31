@@ -16,7 +16,7 @@ public class BloomFilterOperationController
 	private BloomFilter bloomFilter;
 
 	@GetMapping("/search")
-	public String search(@RequestParam String input)
+	public boolean search(@RequestParam String input)
 	{
 		boolean isPresent = false;
 		try
@@ -25,9 +25,9 @@ public class BloomFilterOperationController
 			isPresent = bloomFilter.fastSearch(input);
 
 			if (isPresent)
-				return "Found";
+				return true;
 			else
-				return "Not Found";
+				return false;
 
 		} 
 		catch (Exception e)
