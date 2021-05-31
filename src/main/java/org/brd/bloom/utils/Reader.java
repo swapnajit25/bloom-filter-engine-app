@@ -4,12 +4,15 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,13 +43,12 @@ public class Reader<T>
 		{
 			resource = new ClassPathResource(FILE_NAME);
 			URI uri = resource.getURI();
-			final String[] arr = uri.toString().split("!");
-			fs = FileSystems.newFileSystem(URI.create(arr[0]), new HashMap<String, String>());
-			final Path path = fs.getPath(arr[1]);
+			fs = initFileSystem(uri);
+			final Path path = Paths.get(uri);
 			
 			LOG.info("Resource:" + path.toString());
 			
-			stream = Files.lines(Paths.get(resource.getURI()));
+			stream = Files.lines(path);
 			list = (List<T>) stream.collect(Collectors.toList());
 		}
 		catch(Exception ex)
@@ -58,9 +60,28 @@ public class Reader<T>
 		{
 			if(stream != null)
 				stream.close();
-			if(fs != null)
-				fs.close();
+			try 
+			{
+				if(fs != null)
+					fs.close();
+			}
+			catch (Exception e) 
+			{
+			}
+			
 		}
 		return list;
+	}
+	
+	private FileSystem initFileSystem(URI uri) throws IOException 
+	{
+	    try 
+	    {
+	        return FileSystems.newFileSystem(uri, Collections.emptyMap());
+	    }
+	    catch(IllegalArgumentException e) 
+	    {
+	        return FileSystems.getDefault();
+	    }
 	}
 }
